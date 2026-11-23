@@ -6,12 +6,26 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Check for accidental secrets or key material
+        run: |
+          if git grep -nE "(BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{20,})" -- ':(exclude).github/workflows/ci.yml'; then
+            echo "Potential secret pattern detected in tracked files."
+            exit 1
+          fi
+          if git ls-files | grep -E '(^|/)\.env(\.|$)|\.(pem|key)$|(^|/)kubeconfig'; then
+            echo "Forbidden secret or kubeconfig file tracked in git."
+            exit 1
+          fi
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -29,9 +43,15 @@ jobs:
         working-directory: shared/loadgen
         run: uv run ruff check .
 
+      - name: Lint Lab 01 app with ruff
+        run: shared/loadgen/.venv/bin/ruff check labs/01-cgroup-cpu-throttling/app
+
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
         run: uv run pytest -v
 
       - name: Validate shared observability compose config
         run: docker compose -f shared/observability/docker-compose.yml config -q
+
+      - name: Validate Lab 01 compose config
+        run: docker compose --profile broken --profile fixed -f labs/01-cgroup-cpu-throttling/docker-compose.yml config -q

@@ -16,5 +16,12 @@ tmp/
 shared/observability/prometheus/targets/*.json
 !shared/observability/prometheus/targets/.gitkeep
 
+# Secrets & local cluster configs
+.env
+.env.*
+*.pem
+*.key
+kubeconfig*
+
 # OS
 .DS_Store
