@@ -26,7 +26,7 @@ Each lab captures deterministic client-side latency/error reports from `shared/l
 
 | # | Lab | Runtime | Core Failure Mode | Status |
 |---|---|---|---|---|
-| 01 | `01-cgroup-cpu-throttling` | Docker Compose | CFS CPU quota throttling causing p99 divergence at low average CPU | Planned |
+| 01 | [`01-cgroup-cpu-throttling`](labs/01-cgroup-cpu-throttling/README.md) | Docker Compose | CFS CPU quota throttling causing p99 divergence at low average CPU | Complete |
 | 02 | `02-oomkill-memory-pressure` | Docker Compose | Unbounded cache growth hitting `memory.max` -> kernel OOM kill (`exit 137`) | Planned |
 | 03 | `03-k8s-probe-death-spiral` | `kind` | Coupled liveness probes causing cascading restarts during downstream slowdowns | Planned |
 | 04 | `04-k8s-drain-traffic-blackhole` | `kind` | Async EndpointSlice/kube-proxy propagation dropping requests during rollouts | Planned |

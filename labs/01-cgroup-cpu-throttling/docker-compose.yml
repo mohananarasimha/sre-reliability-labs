@@ -1,0 +1,53 @@
+x-api-common: &api-common
+  build:
+    context: ./app
+    dockerfile: Dockerfile
+  read_only: true
+  tmpfs:
+    - /tmp:size=64m,nosuid,nodev
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  mem_limit: 256m
+  ports:
+    - "127.0.0.1:8081:8080"
+  healthcheck:
+    test:
+      - "CMD"
+      - "python"
+      - "-c"
+      - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2)"
+    interval: 3s
+    timeout: 2s
+    retries: 10
+    start_period: 3s
+  networks:
+    - sre-lab-net
+
+services:
+  api-broken:
+    <<: *api-common
+    profiles: ["broken"]
+    container_name: sre-lab01-api-broken
+    cpus: "0.25"
+    environment:
+      LAB_PROFILE: "broken"
+      WORKERS: "4"
+      WORK_MS: "15"
+      PROMETHEUS_MULTIPROC_DIR: "/tmp/prom_multiproc"
+
+  api-fixed:
+    <<: *api-common
+    profiles: ["fixed"]
+    container_name: sre-lab01-api-fixed
+    cpus: "2.00"
+    environment:
+      LAB_PROFILE: "fixed"
+      WORKERS: "2"
+      WORK_MS: "15"
+      PROMETHEUS_MULTIPROC_DIR: "/tmp/prom_multiproc"
+
+networks:
+  sre-lab-net:
+    external: true
