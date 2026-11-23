@@ -1,0 +1,20 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+
+# Evidence and temporary artifacts
+evidence/*.json
+evidence/**/*.json
+tmp/
+
+# Dynamic Prometheus file_sd targets (keep directory via .gitkeep)
+shared/observability/prometheus/targets/*.json
+!shared/observability/prometheus/targets/.gitkeep
+
+# OS
+.DS_Store
