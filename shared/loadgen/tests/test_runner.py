@@ -37,6 +37,66 @@ async def test_healthy_200_responses() -> None:
     assert result.latency_ms.min_ms >= 0.0
     assert result.latency_ms.p50_ms <= result.latency_ms.p95_ms <= result.latency_ms.p99_ms
     assert result.achieved_rps > 0.0
+    assert result.target_rate_sustained is True
+    assert result.to_dict()["target_rate_sustained"] is True
+
+
+@pytest.mark.asyncio
+async def test_target_rate_sustained_none_without_rps() -> None:
+    transport = httpx.MockTransport(lambda _req: httpx.Response(200, text="ok"))
+    config = LoadConfig(
+        url="http://service.local/health",
+        concurrency=1,
+        duration_s=0.05,
+        rps=None,
+    )
+    result = await run_load(config, transport=transport)
+    assert result.target_rps is None
+    assert result.target_rate_sustained is None
+    assert result.to_dict()["target_rate_sustained"] is None
+
+
+def test_under_delivered_rps_warns_coordinated_omission(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    import asyncio
+
+    async def slow_handler(_request: httpx.Request) -> httpx.Response:
+        await asyncio.sleep(0.06)
+        return httpx.Response(200, text="slow")
+
+    async def fake_run_load(cfg: LoadConfig) -> object:
+        return await run_load(cfg, transport=httpx.MockTransport(slow_handler))
+
+    monkeypatch.setattr("loadgen.cli.run_load", fake_run_load)
+    runner = CliRunner()
+    report_path = tmp_path / "underdelivered.json"
+
+    cli_result = runner.invoke(
+        app,
+        [
+            "run",
+            "--url",
+            "http://service.local/slow",
+            "--concurrency",
+            "1",
+            "--duration",
+            "0.2",
+            "--rps",
+            "100",
+            "--json-out",
+            str(report_path),
+        ],
+    )
+    assert cli_result.exit_code == 0
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    assert payload["target_rps"] == 100.0
+    assert payload["achieved_rps"] < 90.0
+    assert payload["target_rate_sustained"] is False
+    combined_output = (cli_result.stderr or "") + (cli_result.output or "")
+    assert "coordinated omission" in combined_output.lower()
+    assert "not sustained" in combined_output.lower()
 
 
 @pytest.mark.asyncio

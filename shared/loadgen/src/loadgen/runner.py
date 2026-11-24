@@ -105,6 +105,7 @@ class LoadResult:
     error_requests: int
     error_rate: float
     achieved_rps: float
+    target_rate_sustained: bool | None
     status_codes: dict[str, int]
     transport_errors: dict[str, int]
     latency_ms: LatencyStats
@@ -122,6 +123,7 @@ class LoadResult:
             "error_requests": self.error_requests,
             "error_rate": round(self.error_rate, 6),
             "achieved_rps": round(self.achieved_rps, 3),
+            "target_rate_sustained": self.target_rate_sustained,
             "status_codes": dict(sorted(self.status_codes.items())),
             "transport_errors": dict(sorted(self.transport_errors.items())),
             "latency_ms": self.latency_ms.to_dict(),
@@ -243,6 +245,9 @@ async def run_load(
     error_requests = total_requests - success_requests
     error_rate = (error_requests / total_requests) if total_requests > 0 else 0.0
     achieved_rps = total_requests / actual_duration
+    target_rate_sustained = (
+        achieved_rps >= (0.90 * config.rps) if config.rps is not None else None
+    )
 
     return LoadResult(
         url=config.url,
@@ -256,6 +261,7 @@ async def run_load(
         error_requests=error_requests,
         error_rate=error_rate,
         achieved_rps=achieved_rps,
+        target_rate_sustained=target_rate_sustained,
         status_codes=dict(status_counts),
         transport_errors=dict(transport_errors),
         latency_ms=LatencyStats.from_samples(latencies_ms),
