@@ -298,8 +298,9 @@
             "lineWidth": 2,
             "showPoints": "never"
           },
+          "max": 100,
           "min": 0,
-          "unit": "percentunit"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -327,8 +328,8 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(container_cpu_cfs_throttled_seconds_total[30s])",
-          "legendFormat": "{{name}} ({{container}})",
+          "expr": "100 * rate(cgroup_cpu_nr_throttled_total[30s]) / clamp_min(rate(cgroup_cpu_nr_periods_total[30s]), 1e-9)",
+          "legendFormat": "{{job}} ({{profile}}) throttled %",
           "refId": "A"
         }
       ],
@@ -381,12 +382,30 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_working_set_bytes",
-          "legendFormat": "{{name}} ({{container}})",
+          "expr": "cgroup_memory_current_bytes",
+          "legendFormat": "{{job}} ({{profile}}) current",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "cgroup_memory_max_bytes",
+          "legendFormat": "{{job}} ({{profile}}) max",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "app_process_rss_bytes",
+          "legendFormat": "{{job}} ({{profile}}) process RSS",
+          "refId": "C"
         }
       ],
-      "title": "Container Memory Working Set",
+      "title": "Container Memory Usage vs Limit",
       "type": "timeseries"
     }
   ],

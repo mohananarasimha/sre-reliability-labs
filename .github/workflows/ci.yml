@@ -43,11 +43,11 @@ jobs:
         working-directory: shared/loadgen
         run: uv run ruff check .
 
-      - name: Lint Lab 01 app with ruff
-        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/01-cgroup-cpu-throttling/app
+      - name: Lint Lab 01 Python files with ruff
+        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/01-cgroup-cpu-throttling/app labs/01-cgroup-cpu-throttling/cgroup_delta.py
 
-      - name: Lint Lab 02 app with ruff
-        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/02-oomkill-memory-pressure/app
+      - name: Lint Lab 02 Python files with ruff
+        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/02-oomkill-memory-pressure/app labs/02-oomkill-memory-pressure/summarize_oom.py
 
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
