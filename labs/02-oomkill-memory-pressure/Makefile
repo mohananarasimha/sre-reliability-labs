@@ -14,22 +14,46 @@ up-fixed:
 	docker compose --profile broken down --remove-orphans
 	docker compose --profile fixed up -d --build --wait
 	@printf '[\n  {\n    "targets": ["api-fixed:8080"],\n    "labels": {\n      "job": "lab02-oomkill-memory",\n      "lab": "02-oomkill-memory-pressure",\n      "profile": "fixed"\n    }\n  }\n]\n' > $(TARGET_FILE)
-	@echo "Lab 02 [fixed] up on $(API_URL) (mem_limit=256m, memswap_limit=256m, CACHE_MODE=bounded_lru, CACHE_MAX_ENTRIES=32, MEM_SOFT_LIMIT_PCT=75)"
+	@echo "Lab 02 [fixed] up on $(API_URL) (mem_limit=96m, memswap_limit=96m, CACHE_MODE=bounded_lru, CACHE_MAX_ENTRIES=24, MEM_SOFT_LIMIT_PCT=75)"
 
 load:
 	@mkdir -p $(CURDIR)/tmp
-	@PROFILE=$$(curl -fsS $(API_URL)/memory-stats 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('profile','run'))" 2>/dev/null || echo "run"); \
+	@PRE_JSON=$$(curl -fsS $(API_URL)/memory-stats 2>/dev/null || echo "{}"); \
+	PROFILE=$$(printf '%s' "$$PRE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('profile','run'))" 2>/dev/null || echo "run"); \
+	OOM_BEFORE=$$(printf '%s' "$$PRE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin).get('oom_kills',0))" 2>/dev/null || echo "0"); \
+	CONTAINER="sre-lab02-api-$$PROFILE"; \
 	OUT_FILE="$(CURDIR)/tmp/load-$$PROFILE.json"; \
-	echo "Running loadgen against $(API_URL)/ingest (profile=$$PROFILE, concurrency=4, duration=15s, rps=15, timeout=3.0)..."; \
-	cd $(LOADGEN_DIR) && uv run loadgen run \
+	EVENTS_FILE="$(CURDIR)/tmp/docker-events-$$PROFILE.jsonl"; \
+	INSPECT_FILE="$(CURDIR)/tmp/docker-inspect-$$PROFILE.json"; \
+	SUMMARY_FILE="$(CURDIR)/tmp/oom-summary-$$PROFILE.json"; \
+	START_EPOCH=$$(date +%s); \
+	echo "Running loadgen against $(API_URL)/ingest (profile=$$PROFILE, container=$$CONTAINER, concurrency=4, duration=15s, rps=15, timeout=3.0)..."; \
+	(cd $(LOADGEN_DIR) && uv run loadgen run \
 		--url $(API_URL)/ingest \
 		--concurrency 4 \
 		--duration 15 \
 		--rps 15 \
 		--timeout 3.0 \
-		--json-out "$$OUT_FILE"; \
+		--max-error-rate 0.02 \
+		--json-out "$$OUT_FILE"); \
 	RC=$$?; \
-	echo "Saved JSON evidence to $$OUT_FILE (loadgen exit=$$RC)"; \
+	END_EPOCH=$$(($$(date +%s) + 1)); \
+	docker events --since "$$START_EPOCH" --until "$$END_EPOCH" \
+		--filter "container=$$CONTAINER" \
+		--filter "event=oom" \
+		--filter "event=die" \
+		--format '{{json .}}' > "$$EVENTS_FILE" || true; \
+	docker inspect "$$CONTAINER" > "$$INSPECT_FILE" 2>/dev/null || echo '[]' > "$$INSPECT_FILE"; \
+	OOM_AFTER=$$(curl -fsS $(API_URL)/memory-stats 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin).get('oom_kills',-1))" 2>/dev/null || echo "-1"); \
+	python3 $(CURDIR)/summarize_oom.py \
+		--profile "$$PROFILE" \
+		--container "$$CONTAINER" \
+		--events-file "$$EVENTS_FILE" \
+		--inspect-file "$$INSPECT_FILE" \
+		--oom-before "$$OOM_BEFORE" \
+		--oom-after "$$OOM_AFTER" \
+		--out "$$SUMMARY_FILE"; \
+	echo "Saved load JSON to $$OUT_FILE, events to $$EVENTS_FILE, summary to $$SUMMARY_FILE (loadgen exit=$$RC)"; \
 	exit $$RC
 
 inspect-memory:

@@ -9,6 +9,9 @@ x-api-common: &api-common
     - no-new-privileges:true
   cap_drop:
     - ALL
+  mem_limit: 96m
+  memswap_limit: 96m
+  restart: "on-failure:5"
   ports:
     - "127.0.0.1:8082:8080"
   healthcheck:
@@ -29,9 +32,6 @@ services:
     <<: *api-common
     profiles: ["broken"]
     container_name: sre-lab02-api-broken
-    mem_limit: 96m
-    memswap_limit: 96m
-    restart: "on-failure:5"
     environment:
       LAB_PROFILE: "broken"
       CACHE_MODE: "unbounded"
@@ -41,13 +41,10 @@ services:
     <<: *api-common
     profiles: ["fixed"]
     container_name: sre-lab02-api-fixed
-    mem_limit: 256m
-    memswap_limit: 256m
-    restart: "no"
     environment:
       LAB_PROFILE: "fixed"
       CACHE_MODE: "bounded_lru"
-      CACHE_MAX_ENTRIES: "32"
+      CACHE_MAX_ENTRIES: "24"
       PAYLOAD_KB: "1024"
       MEM_SOFT_LIMIT_PCT: "75"
 
