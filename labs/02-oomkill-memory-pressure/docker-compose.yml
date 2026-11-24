@@ -1,0 +1,56 @@
+x-api-common: &api-common
+  build:
+    context: ./app
+    dockerfile: Dockerfile
+  read_only: true
+  tmpfs:
+    - /tmp:size=32m,nosuid,nodev
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  ports:
+    - "127.0.0.1:8082:8080"
+  healthcheck:
+    test:
+      - "CMD"
+      - "python"
+      - "-c"
+      - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2)"
+    interval: 3s
+    timeout: 2s
+    retries: 10
+    start_period: 3s
+  networks:
+    - sre-lab-net
+
+services:
+  api-broken:
+    <<: *api-common
+    profiles: ["broken"]
+    container_name: sre-lab02-api-broken
+    mem_limit: 96m
+    memswap_limit: 96m
+    restart: "on-failure:5"
+    environment:
+      LAB_PROFILE: "broken"
+      CACHE_MODE: "unbounded"
+      PAYLOAD_KB: "1024"
+
+  api-fixed:
+    <<: *api-common
+    profiles: ["fixed"]
+    container_name: sre-lab02-api-fixed
+    mem_limit: 256m
+    memswap_limit: 256m
+    restart: "no"
+    environment:
+      LAB_PROFILE: "fixed"
+      CACHE_MODE: "bounded_lru"
+      CACHE_MAX_ENTRIES: "32"
+      PAYLOAD_KB: "1024"
+      MEM_SOFT_LIMIT_PCT: "75"
+
+networks:
+  sre-lab-net:
+    external: true

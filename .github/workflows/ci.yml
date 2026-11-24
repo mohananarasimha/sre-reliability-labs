@@ -44,7 +44,10 @@ jobs:
         run: uv run ruff check .
 
       - name: Lint Lab 01 app with ruff
-        run: shared/loadgen/.venv/bin/ruff check labs/01-cgroup-cpu-throttling/app
+        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/01-cgroup-cpu-throttling/app
+
+      - name: Lint Lab 02 app with ruff
+        run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/02-oomkill-memory-pressure/app
 
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
@@ -55,3 +58,6 @@ jobs:
 
       - name: Validate Lab 01 compose config
         run: docker compose --profile broken --profile fixed -f labs/01-cgroup-cpu-throttling/docker-compose.yml config -q
+
+      - name: Validate Lab 02 compose config
+        run: docker compose --profile broken --profile fixed -f labs/02-oomkill-memory-pressure/docker-compose.yml config -q
