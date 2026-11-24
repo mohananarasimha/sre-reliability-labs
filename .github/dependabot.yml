@@ -24,3 +24,13 @@ updates:
     directory: "/labs/01-cgroup-cpu-throttling/app"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/labs/02-oomkill-memory-pressure"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/labs/02-oomkill-memory-pressure/app"
+    schedule:
+      interval: "weekly"
