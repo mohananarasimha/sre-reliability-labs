@@ -30,22 +30,24 @@ services:
     <<: *api-common
     profiles: ["broken"]
     container_name: sre-lab01-api-broken
-    cpus: "0.25"
+    cpus: "0.5"
     environment:
       LAB_PROFILE: "broken"
-      WORKERS: "4"
-      WORK_MS: "15"
+      WORKERS: "1"
+      PARALLELISM: "4"
+      WORK_MS: "20"
       PROMETHEUS_MULTIPROC_DIR: "/tmp/prom_multiproc"
 
   api-fixed:
     <<: *api-common
     profiles: ["fixed"]
     container_name: sre-lab01-api-fixed
-    cpus: "2.00"
+    cpus: "1.0"
     environment:
       LAB_PROFILE: "fixed"
-      WORKERS: "2"
-      WORK_MS: "15"
+      WORKERS: "1"
+      PARALLELISM: "4"
+      WORK_MS: "20"
       PROMETHEUS_MULTIPROC_DIR: "/tmp/prom_multiproc"
 
 networks:

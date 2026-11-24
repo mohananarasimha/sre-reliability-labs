@@ -17,6 +17,7 @@ app = typer.Typer(
     help="Async HTTP load generator for sre-reliability-labs.",
 )
 console = Console()
+err_console = Console(stderr=True)
 
 
 @app.callback()
@@ -52,6 +53,9 @@ def _render_summary(result: LoadResult) -> None:
     table.add_row("Errors", str(result.error_requests))
     table.add_row("Error Rate", f"{result.error_rate * 100:.2f}%")
     table.add_row("Achieved RPS", f"{result.achieved_rps:.2f}")
+    if result.target_rps is not None:
+        table.add_row("Target RPS", f"{result.target_rps:.2f}")
+        table.add_row("Target Rate Sustained", str(result.target_rate_sustained))
     table.add_row(
         "Latency ms (p50/p95/p99)",
         (
@@ -146,6 +150,14 @@ def run_command(
 
     result = asyncio.run(run_load(config))
     _render_summary(result)
+
+    if result.target_rate_sustained is False and result.target_rps is not None:
+        err_console.print(
+            f"[bold yellow]WARNING:[/bold yellow] Target rate {result.target_rps:.2f} RPS was not "
+            f"sustained (achieved {result.achieved_rps:.2f} RPS, <90% of target). "
+            "Closed-loop pacing under-delivered; reported latencies exclude client-side queueing "
+            "(coordinated omission)."
+        )
 
     if json_out is not None:
         json_out.parent.mkdir(parents=True, exist_ok=True)
