@@ -87,6 +87,8 @@ make run-fixed  RUN=1         # writes tmp/fixed-run1-summary.json
 make down                     # deletes kind cluster sre-lab03
 ```
 
+Phase boundaries are wall-clock. `run-experiment.sh` aborts if the spike is injected or restored more than `MAX_SCHEDULE_DRIFT_S` (default 3s) late, because the client's per-phase counts would then be misattributed. On a laptop, keep the host awake during runs (macOS: `caffeinate -i make run-broken RUN=1`).
+
 ## Prevention
 
 - Enforce probe policy in CI/admission reviews: `livenessProbe` must target a lightweight local endpoint (`/livez`), never an upstream/DB check.
