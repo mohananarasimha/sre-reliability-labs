@@ -34,3 +34,8 @@ updates:
     directory: "/labs/02-oomkill-memory-pressure/app"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/labs/03-k8s-probe-death-spiral/app"
+    schedule:
+      interval: "weekly"

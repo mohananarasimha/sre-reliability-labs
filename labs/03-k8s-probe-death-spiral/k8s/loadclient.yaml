@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: loadclient
+  namespace: lab03
+  labels:
+    app: loadclient
+spec:
+  restartPolicy: Never
+  automountServiceAccountToken: false
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: loadclient
+      image: sre-lab03-app:local
+      imagePullPolicy: IfNotPresent
+      command: ["python3", "/app/loadclient.py"]
+      env:
+        - name: TARGET_URL
+          value: "http://api:8080/work"
+        - name: RPS
+          value: "4"
+        - name: DURATION_S
+          value: "150"
+        - name: TIMEOUT_S
+          value: "2.0"
+        - name: MAX_WORKERS
+          value: "16"
+      resources:
+        requests:
+          cpu: 25m
+          memory: 32Mi
+        limits:
+          cpu: 200m
+          memory: 96Mi
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop: ["ALL"]

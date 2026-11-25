@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: lab03
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+        profile: fixed
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: sre-lab03-app:local
+          imagePullPolicy: IfNotPresent
+          command: ["python3", "/app/api.py"]
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: LAB_PROFILE
+              value: "fixed"
+            - name: WARMUP_SECONDS
+              value: "12"
+            - name: DOWNSTREAM_HOST
+              value: "downstream"
+            - name: DOWNSTREAM_PORT
+              value: "8080"
+            - name: WORK_TIMEOUT_S
+              value: "1.5"
+            - name: DEEP_HEALTH_TIMEOUT_S
+              value: "0.9"
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 96Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          # Fixed probe configuration: startupProbe covers warmup; liveness checks only process;
+          # readiness checks local readiness without coupling to shared downstream.
+          startupProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 15
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 2
+            timeoutSeconds: 1
+            failureThreshold: 2

@@ -49,6 +49,11 @@ jobs:
       - name: Lint Lab 02 Python files with ruff
         run: shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/02-oomkill-memory-pressure/app labs/02-oomkill-memory-pressure/summarize_oom.py
 
+      - name: Lint Lab 03 Python and shell files
+        run: |
+          shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/03-k8s-probe-death-spiral/app labs/03-k8s-probe-death-spiral/summarize.py
+          bash -n labs/03-k8s-probe-death-spiral/run-experiment.sh
+
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
         run: uv run pytest -v
