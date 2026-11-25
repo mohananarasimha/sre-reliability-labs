@@ -112,20 +112,37 @@ cleanup_observer() {
 }
 trap cleanup_observer EXIT
 
+# Phase boundaries are wall-clock; if the host sleeps or the API stalls, the
+# client's phase windows no longer match reality and the run must be discarded.
+MAX_SCHEDULE_DRIFT_S="${MAX_SCHEDULE_DRIFT_S:-3}"
+assert_on_schedule() {
+  local label="$1" planned="$2" actual
+  actual=$(( $(date +%s) - START_EPOCH ))
+  if (( actual - planned > MAX_SCHEDULE_DRIFT_S )); then
+    echo "[lab03] ERROR: ${label} fired at t=${actual}s, planned t=${planned}s (drift > ${MAX_SCHEDULE_DRIFT_S}s). Discarding run." >&2
+    set_downstream_latency "${HEALTHY_DELAY_MS}" >/dev/null || true
+    exit 1
+  fi
+}
+
 # Wait until baseline window ends, then inject downstream latency spike.
 while (( $(date +%s) - START_EPOCH < BASELINE_S )); do
   sleep 1
 done
+assert_on_schedule "spike injection" "${BASELINE_S}"
 echo -n "[lab03] t=$(( $(date +%s) - START_EPOCH ))s: Injecting downstream latency=${SPIKE_DELAY_MS}ms: "
 set_downstream_latency "${SPIKE_DELAY_MS}"
+assert_on_schedule "spike injection" "${BASELINE_S}"
 
 # Hold latency spike for SPIKE_S seconds, then restore healthy latency.
 SPIKE_END=$((BASELINE_S + SPIKE_S))
 while (( $(date +%s) - START_EPOCH < SPIKE_END )); do
   sleep 1
 done
+assert_on_schedule "spike restore" "${SPIKE_END}"
 echo -n "[lab03] t=$(( $(date +%s) - START_EPOCH ))s: Restoring downstream latency=${HEALTHY_DELAY_MS}ms: "
 set_downstream_latency "${HEALTHY_DELAY_MS}"
+assert_on_schedule "spike restore" "${SPIKE_END}"
 
 # Wait for loadclient pod to finish its full 150s run.
 echo "[lab03] Waiting for loadclient pod to complete recovery window (${DURATION_S}s total)..."
