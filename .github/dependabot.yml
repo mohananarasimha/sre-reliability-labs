@@ -39,3 +39,8 @@ updates:
     directory: "/labs/03-k8s-probe-death-spiral/app"
     schedule:
       interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/labs/04-k8s-drain-traffic-blackhole/app"
+    schedule:
+      interval: "weekly"

@@ -54,6 +54,11 @@ jobs:
           shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/03-k8s-probe-death-spiral/app labs/03-k8s-probe-death-spiral/summarize.py
           bash -n labs/03-k8s-probe-death-spiral/run-experiment.sh
 
+      - name: Lint Lab 04 Python and shell files
+        run: |
+          shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/04-k8s-drain-traffic-blackhole/app labs/04-k8s-drain-traffic-blackhole/summarize.py
+          bash -n labs/04-k8s-drain-traffic-blackhole/run-experiment.sh
+
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
         run: uv run pytest -v
