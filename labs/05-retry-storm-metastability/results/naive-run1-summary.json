@@ -1,0 +1,141 @@
+{
+  "policy": "naive",
+  "run_id": 1,
+  "trigger": "+300ms for 10s at t=20s",
+  "trigger_fired_at_s": 20.03,
+  "phases": {
+    "baseline": {
+      "ok": 2400,
+      "total": 2400,
+      "success_pct": 100.0
+    },
+    "trigger": {
+      "ok": 4,
+      "total": 1200,
+      "success_pct": 0.33
+    },
+    "after_trigger": {
+      "ok": 156,
+      "total": 7200,
+      "success_pct": 2.17
+    },
+    "last_30s": {
+      "ok": 72,
+      "total": 3600,
+      "success_pct": 2.0
+    }
+  },
+  "recovered_at_s": null,
+  "recovery_after_trigger_end_s": null,
+  "amplification": {
+    "after_trigger": {
+      "frontend_requests": 7160,
+      "backend_attempts": 28275,
+      "attempts_per_request": 3.95,
+      "backend_rejected_503": 16959,
+      "budget_denied": 0
+    },
+    "last_30s": {
+      "frontend_requests": 3517,
+      "backend_attempts": 13938,
+      "attempts_per_request": 3.96,
+      "backend_rejected_503": 8289,
+      "budget_denied": 0
+    }
+  },
+  "backend_waiting_max": 500,
+  "backend_waiting_at_end": 370,
+  "late_sends_total": 0,
+  "timeline_5s": [
+    {
+      "t": "0-4",
+      "success_pct": 100.0,
+      "backend_waiting": 0
+    },
+    {
+      "t": "5-9",
+      "success_pct": 100.0,
+      "backend_waiting": 0
+    },
+    {
+      "t": "10-14",
+      "success_pct": 100.0,
+      "backend_waiting": 0
+    },
+    {
+      "t": "15-19",
+      "success_pct": 100.0,
+      "backend_waiting": 0
+    },
+    {
+      "t": "20-24",
+      "success_pct": 0.67,
+      "backend_waiting": 500
+    },
+    {
+      "t": "25-29",
+      "success_pct": 0.0,
+      "backend_waiting": 499
+    },
+    {
+      "t": "30-34",
+      "success_pct": 1.5,
+      "backend_waiting": 499
+    },
+    {
+      "t": "35-39",
+      "success_pct": 2.0,
+      "backend_waiting": 498
+    },
+    {
+      "t": "40-44",
+      "success_pct": 3.83,
+      "backend_waiting": 500
+    },
+    {
+      "t": "45-49",
+      "success_pct": 1.17,
+      "backend_waiting": 499
+    },
+    {
+      "t": "50-54",
+      "success_pct": 3.33,
+      "backend_waiting": 500
+    },
+    {
+      "t": "55-59",
+      "success_pct": 2.17,
+      "backend_waiting": 499
+    },
+    {
+      "t": "60-64",
+      "success_pct": 1.5,
+      "backend_waiting": 500
+    },
+    {
+      "t": "65-69",
+      "success_pct": 1.5,
+      "backend_waiting": 499
+    },
+    {
+      "t": "70-74",
+      "success_pct": 1.17,
+      "backend_waiting": 499
+    },
+    {
+      "t": "75-79",
+      "success_pct": 3.0,
+      "backend_waiting": 499
+    },
+    {
+      "t": "80-84",
+      "success_pct": 2.17,
+      "backend_waiting": 498
+    },
+    {
+      "t": "85-89",
+      "success_pct": 2.67,
+      "backend_waiting": 500
+    }
+  ]
+}

@@ -59,6 +59,11 @@ jobs:
           shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/04-k8s-drain-traffic-blackhole/app labs/04-k8s-drain-traffic-blackhole/summarize.py
           bash -n labs/04-k8s-drain-traffic-blackhole/run-experiment.sh
 
+      - name: Lint Lab 05 Python and shell files
+        run: |
+          shared/loadgen/.venv/bin/ruff check --select E,F,I,UP,B,S labs/05-retry-storm-metastability/app labs/05-retry-storm-metastability/summarize.py
+          bash -n labs/05-retry-storm-metastability/run-experiment.sh
+
       - name: Test loadgen with pytest
         working-directory: shared/loadgen
         run: uv run pytest -v
@@ -71,3 +76,6 @@ jobs:
 
       - name: Validate Lab 02 compose config
         run: docker compose --profile broken --profile fixed -f labs/02-oomkill-memory-pressure/docker-compose.yml config -q
+
+      - name: Validate Lab 05 compose config
+        run: docker compose --profile client -f labs/05-retry-storm-metastability/docker-compose.yml config -q
