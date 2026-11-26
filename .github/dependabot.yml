@@ -24,6 +24,10 @@ updates:
     directory: "/labs/01-cgroup-cpu-throttling/app"
     schedule:
       interval: "weekly"
+    ignore:
+      # Lab results were measured on python 3.12; take patch updates only.
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "docker-compose"
     directory: "/labs/02-oomkill-memory-pressure"
@@ -34,13 +38,25 @@ updates:
     directory: "/labs/02-oomkill-memory-pressure/app"
     schedule:
       interval: "weekly"
+    ignore:
+      # Lab results were measured on python 3.12; take patch updates only.
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "docker"
     directory: "/labs/03-k8s-probe-death-spiral/app"
     schedule:
       interval: "weekly"
+    ignore:
+      # Lab results were measured on python 3.12; take patch updates only.
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "docker"
     directory: "/labs/04-k8s-drain-traffic-blackhole/app"
     schedule:
       interval: "weekly"
+    ignore:
+      # Lab results were measured on python 3.12; take patch updates only.
+      - dependency-name: "python"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
