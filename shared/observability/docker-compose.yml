@@ -23,7 +23,7 @@ services:
       - sre-lab-net
 
   grafana:
-    image: grafana/grafana:11.4.0
+    image: grafana/grafana:13.3.1
     container_name: sre-lab-grafana
     environment:
       # Local lab convenience only. Do NOT reuse these auth settings in shared or production environments.
