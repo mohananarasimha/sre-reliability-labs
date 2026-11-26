@@ -29,7 +29,7 @@ Each lab captures deterministic client-side latency/error reports from `shared/l
 | 01 | [`01-cgroup-cpu-throttling`](labs/01-cgroup-cpu-throttling/README.md) | Docker Compose | CFS CPU quota throttling causing p99 divergence at low average CPU | Complete |
 | 02 | [`02-oomkill-memory-pressure`](labs/02-oomkill-memory-pressure/README.md) | Docker Compose | Unbounded cache growth hitting `memory.max` -> kernel OOM kill (`exit 137`) | Complete |
 | 03 | [`03-k8s-probe-death-spiral`](labs/03-k8s-probe-death-spiral/README.md) | `kind` | Coupled liveness probes causing cascading restarts during downstream slowdowns | Complete |
-| 04 | `04-k8s-drain-traffic-blackhole` | `kind` | Async EndpointSlice/kube-proxy propagation dropping requests during rollouts | Planned |
+| 04 | [`04-k8s-drain-traffic-blackhole`](labs/04-k8s-drain-traffic-blackhole/README.md) | `kind` | Async EndpointSlice/kube-proxy propagation dropping requests during rollouts | Complete |
 | 05 | `05-retry-storm-metastability` | Docker Compose | Unjittered retries amplifying partial faults into metastable overload | Planned |
 | 06 | `06-llm-inference-hol-blocking` | Docker Compose | FIFO inference gateway head-of-line blocking and KV-cache saturation (TTFT/TPOT) | Planned |
 
